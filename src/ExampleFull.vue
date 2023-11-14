@@ -197,24 +197,28 @@ const state = reactive({
 	useHolidayTheme: true,
 	useTodayIcons: false,
 	items: [
-		/*{
+		{
 			id: "e0",
-			startDate: "2018-01-05",
-		},*/
+			startDate: "2023-11-05",
+			title:"otro ejemplo",
+			tooltip:"ejemplo tooltip" 
+			
+		},
 		{
 			id: "e1",
+			title:"Lauren Caicedo",
 			startDate: thisMonth(15, 18, 30),
 		},
 		{
 			id: "e2",
-			startDate: thisMonth(15),
-			title: "Single-day item with a long title",
+			startDate: thisMonth(15,),
+			title: "Bairon Caicedo",
 		},
 		{
 			id: "e3",
 			startDate: thisMonth(7, 9, 25),
 			endDate: thisMonth(10, 16, 30),
-			title: "Multi-day item with a long title and times",
+			title: "repartido en una semana",
 		},
 		{
 			id: "e4",
@@ -226,8 +230,8 @@ const state = reactive({
 		{
 			id: "e5",
 			startDate: thisMonth(5),
-			endDate: thisMonth(12),
-			title: "Multi-day item",
+			endDate: thisMonth(25),
+			title: "repartido en el mes",
 			classes: "purple",
 			tooltip: "This spans multiple days",
 		},

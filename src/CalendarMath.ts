@@ -177,7 +177,7 @@ const getFormattedWeekdayNames = (locale: string, format: DateTimeFormatOption, 
 
 const getDefaultBrowserLocale = (): string => {
 	// If not running in the browser, cannot determine a default, return the code for unknown (blank is invalid)
-	if (typeof navigator === "undefined") return "unk"
+	if (typeof navigator === "undefined") return "es"
 	// Return the browser's language setting, implementation is browser-specific
 	return (navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language).toLowerCase()
 }
