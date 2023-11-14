@@ -32,24 +32,23 @@
 		</CalendarView>
 	</div>
 </template>
-<script setup lang="ts">
+<script setup>
+
 import { computed, onMounted, reactive } from "vue"
 import CalendarView from "./CalendarView.vue"
 import CalendarViewHeader from "./CalendarViewHeader.vue"
-import { ICalendarItem, INormalizedCalendarItem } from "./ICalendarItem"
+//import { ICalendarItem, INormalizedCalendarItem } from "./ICalendarItem"
 import CalendarMath from "./CalendarMath"
 
-class AppState {
-	showDate: Date = new Date()
-	selectionStart?: Date = undefined
-	selectionEnd?: Date = undefined
-	theme: string = "gcal"
-	items: ICalendarItem[] = []
-}
+const state = reactive({
+	showDate : new Date(),
+	selectionStart : undefined,
+	selectionEnd : undefined,
+	theme : "gcal",
+	items : []
+})
 
-const state = reactive(new AppState())
-
-const themeOptions = computed((): any =>
+const themeOptions = computed(()=>
 	state.theme == "gcal"
 		? {
 				top: "2.6em",
@@ -73,16 +72,16 @@ const themeOptions = computed((): any =>
 		  }
 )
 
-const setShowDate = (d: Date) => (state.showDate = d)
+const setShowDate = (d) => (state.showDate = d)
 
-const setSelection = (dateRange: Date[]) => {
+const setSelection = (dateRange) => {
 	state.selectionEnd = dateRange[1]
 	state.selectionStart = dateRange[0]
 }
 
-const finishSelection = (dateRange: Date[]) => setSelection(dateRange)
+const finishSelection = (dateRange) => setSelection(dateRange)
 
-const getRandomEvent = (index: number): ICalendarItem => {
+const getRandomEvent = (index)=> {
 	const startDay = Math.floor(Math.random() * 28 + 1)
 	const endDay = Math.floor(Math.random() * 4) + startDay
 	var d = new Date()
@@ -96,7 +95,7 @@ const getRandomEvent = (index: number): ICalendarItem => {
 	return i
 }
 
-const onDrop = (item: INormalizedCalendarItem, date: Date) => {
+const onDrop = (item,date) => {
 	// Determine the delta between the old start date and the date chosen,
 	// and apply that delta to both the start and end date to move the item.
 	const eLength = CalendarMath.dayDiff(item.startDate, date)
@@ -104,7 +103,7 @@ const onDrop = (item: INormalizedCalendarItem, date: Date) => {
 	item.originalItem.endDate = CalendarMath.addDays(item.endDate, eLength)
 }
 
-onMounted(() => (state.items = [...Array(25)].map((_, i) => getRandomEvent(i))))
+onMounted(() => (state.items = [...Array(10)].map((_, i) => getRandomEvent(i))))
 </script>
 <style>
 /* For apps using the npm package, the below URLs should reference /node_modules/vue-simple-calendar/dist/css/ instead */

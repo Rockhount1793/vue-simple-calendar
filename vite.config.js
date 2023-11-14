@@ -1,12 +1,11 @@
 import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
-import dts from "vite-plugin-dts"
 const path = require("path")
 
 // Use this config file to build the libary
 
 export default defineConfig({
-	plugins: [dts(), vue()],
+	plugins: [vue()],
 	build: {
 		sourcemap: false,
 		lib: {

@@ -112,7 +112,6 @@
 							>
 								{{ getItemTitle(i) }}
 							</div>
-							div>
 						</slot>
 					</template>
 				</div>
@@ -120,110 +119,66 @@
 		</div>
 	</div>
 </template>
-<script setup lang="ts">
+
+<script setup>
+
 import CalendarMath from "./CalendarMath"
-import CalendarViewState from "./CalendarViewState"
 import { computed, reactive, watch } from "vue"
-import { ICalendarItem, INormalizedCalendarItem, DateTimeFormatOption } from "./ICalendarItem"
-import { IHeaderProps } from "./IHeaderProps"
 
-const props = withDefaults(
-	defineProps<{
-		showDate?: Date
-		displayPeriodUom?: string
-		displayPeriodCount?: number
-		displayWeekNumbers?: boolean
-		locale?: string
-		monthNameFormat?: DateTimeFormatOption
-		weekdayNameFormat?: DateTimeFormatOption
-		showTimes?: boolean
-		timeFormatOptions?: object
-		disablePast?: boolean
-		disableFuture?: boolean
-		enableDateSelection?: boolean
-		selectionStart?: Date
-		selectionEnd?: Date
-		enableDragDrop?: boolean
-		startingDayOfWeek?: number
-		items?: ICalendarItem[]
-		dateClasses?: Record<string, string[]>
-		itemTop?: string
-		itemContentHeight?: string
-		itemBorderHeight?: string
-		periodChangedCallback?: Function
-		currentPeriodLabel?: string
-		currentPeriodLabelIcons?: string
-		doEmitItemMouseEvents?: boolean
-		enableHtmlTitles?: boolean
-	}>(),
-	{
-		showDate: undefined,
-		displayPeriodUom: "month",
-		displayPeriodCount: 1,
-		displayWeekNumbers: false,
-		locale: undefined,
-		monthNameFormat: "long",
-		weekdayNameFormat: "short",
-		showTimes: false,
-		timeFormatOptions: () => ({}),
-		disablePast: false,
-		disableFuture: false,
-		enableDateSelection: false,
-		selectionStart: undefined,
-		selectionEnd: undefined,
-		enableDragDrop: false,
-		startingDayOfWeek: 0,
-		items: () => [],
-		dateClasses: () => ({}),
-		itemTop: "1.4em",
-		itemContentHeight: "1.4em",
-		itemBorderHeight: "2px",
-		periodChangedCallback: undefined,
-		currentPeriodLabel: "",
-		currentPeriodLabelIcons: "⇤-⇥",
-		doEmitItemMouseEvents: false,
-		enableHtmlTitles: true,
-	}
-)
+const props = defineProps({
+		showDate:{ default: undefined },
+		displayPeriodUom: { default:  "month"},
+		displayPeriodCount: { default:  1},
+		displayWeekNumbers: { default: false},
+		locale: { default: undefined},
+		monthNameFormat: { default: "long"},
+		weekdayNameFormat: { default: "short"},
+		showTimes: { default: false},
+		timeFormatOptions: { default: {}},
+		disablePast: { default: false},
+		disableFuture: { default: false},
+		enableDateSelection: { default: false},
+		selectionStart: { default: undefined},
+		selectionEnd: {default:undefined},
+		enableDragDrop: {default: false},
+		startingDayOfWeek: { default: 0},
+		items: {default: []},
+		dateClasses: {default:{}},
+		itemTop: {default:"1.4em"},
+		itemContentHeight:{default: "1.4em"},
+		itemBorderHeight: {default:"2px"},
+		periodChangedCallback: {defasult: undefined},
+		currentPeriodLabel: {default:""},
+		currentPeriodLabelIcons: { default:"⇤-⇥"},
+		doEmitItemMouseEvents: {default:false},
+		enableHtmlTitles: {default:true}
+	})
 
-const emit = defineEmits<{
-	//(e: "input", payload: foo, windowEvent: Event): void
-	(e: "period-changed"): void
-	(e: "click-date", day: Date, itemsInRange: INormalizedCalendarItem[], windowEvent: Event): void
-	(e: "click-item", item: ICalendarItem, windowEvent: Event): void
-	(e: "item-mouseenter", item: ICalendarItem, windowEvent: Event): void
-	(e: "item-mouseleave", item: ICalendarItem, windowEvent: Event): void
-	(e: "drag-start", item: ICalendarItem, windowEvent: Event): void
-	(e: "drag-over-date", currentDragItem: INormalizedCalendarItem, day: Date, windowEvent: Event): void
-	(e: "drag-enter-date", currentDragItem: INormalizedCalendarItem, day: Date, windowEvent: Event): void
-	(e: "drag-leave-date", currentDragItem: INormalizedCalendarItem, day: Date, windowEvent: Event): void
-	(e: "drop-on-date", currentDragItem: INormalizedCalendarItem, day: Date, windowEvent: Event): void
-	(e: "date-selection", selectedDateRange: [Date, Date], windowEvent: Event): void
-	(e: "date-selection-start", selectedDateRange: [Date, Date], windowEvent: Event): void
-	(e: "date-selection-finish", selectedDateRange: [Date, Date], windowEvent: Event): void
-}>()
 
-const state = reactive(new CalendarViewState())
+const state = reactive({
+	currentDragItem: undefined,
+	dateSelectionOrigin: undefined,
+	currentHoveredItemId: "",
+	CalendarMat: CalendarMath
+})
 
 // Props cannot default to computed/method returns, so create defaulted version of this
 // property and use it rather than the bare prop (Vue Issue #6013).
-const displayLocale = computed((): string => props.locale || CalendarMath.getDefaultBrowserLocale())
+const displayLocale = computed(()=> props.locale || CalendarMath.getDefaultBrowserLocale())
 
 /*
 ShowDate, but defaulted to today. Needed both for periodStart below and for the
 "outside of month" class. Any time component passed as part of showDate is discarded.
 */
-const defaultedShowDate = computed((): Date => (props.showDate ? CalendarMath.dateOnly(props.showDate) : CalendarMath.today()))
+const defaultedShowDate = computed(()=>(props.showDate ? CalendarMath.dateOnly(props.showDate) : CalendarMath.today()))
 
 // Given the showDate, defaulted to today, computes the beginning and end of the period
 // that the date falls within.
-const periodStart = computed((): Date => CalendarMath.beginningOfPeriod(defaultedShowDate.value, props.displayPeriodUom, props.startingDayOfWeek))
+const periodStart = computed(()=> CalendarMath.beginningOfPeriod(defaultedShowDate.value, props.displayPeriodUom, props.startingDayOfWeek))
 
-const periodEnd = computed(
-	(): Date => CalendarMath.addDays(CalendarMath.incrementPeriod(periodStart.value, props.displayPeriodUom, props.displayPeriodCount), -1)
-)
+const periodEnd = computed(()=> CalendarMath.addDays(CalendarMath.incrementPeriod(periodStart.value, props.displayPeriodUom, props.displayPeriodCount), -1))
 
-const periodStartCalendarWeek = computed((): number => {
+const periodStartCalendarWeek = computed(()=> {
 	const firstWeekStarts = CalendarMath.beginningOfWeek(CalendarMath.beginningOfPeriod(periodStart.value, "year", 0), props.startingDayOfWeek)
 	const periodWeekStarts = CalendarMath.beginningOfWeek(periodStart.value, props.startingDayOfWeek)
 	return 1 + Math.floor(CalendarMath.dayDiff(firstWeekStarts, periodWeekStarts) / 7)
@@ -232,36 +187,34 @@ const periodStartCalendarWeek = computed((): number => {
 // For month and year views, the first and last dates displayed in the grid may not
 // be the same as the intended period, since the period may not start and stop evenly
 // on the starting day of the week.
-const displayFirstDate = computed((): Date => CalendarMath.beginningOfWeek(periodStart.value, props.startingDayOfWeek))
-const displayLastDate = computed((): Date => CalendarMath.endOfWeek(periodEnd.value, props.startingDayOfWeek))
+const displayFirstDate = computed(()=> CalendarMath.beginningOfWeek(periodStart.value, props.startingDayOfWeek))
+const displayLastDate = computed(()=> CalendarMath.endOfWeek(periodEnd.value, props.startingDayOfWeek))
 
 // Create an array of dates, where each date represents the beginning of a week that
 // should be rendered in the view for the current period.
-const weeksOfPeriod = computed((): Date[] => {
+const weeksOfPeriod = computed(()=> {
 	const numWeeks = Math.floor((CalendarMath.dayDiff(displayFirstDate.value, displayLastDate.value) + 1) / 7)
 	return [...Array(numWeeks)].map((_, i) => CalendarMath.addDays(displayFirstDate.value, i * 7))
 })
 
 // Cache the names based on current locale and format settings
-const monthNames = computed((): string[] => CalendarMath.getFormattedMonthNames(displayLocale.value, props.monthNameFormat))
-const weekdayNames = computed((): string[] => CalendarMath.getFormattedWeekdayNames(displayLocale.value, props.weekdayNameFormat, props.startingDayOfWeek))
+const monthNames = computed(()=> CalendarMath.getFormattedMonthNames(displayLocale.value, props.monthNameFormat))
+const weekdayNames = computed(()=> CalendarMath.getFormattedWeekdayNames(displayLocale.value, props.weekdayNameFormat, props.startingDayOfWeek))
 
 // Ensure all item properties have suitable default
-const fixedItems = computed((): INormalizedCalendarItem[] => {
+const fixedItems = computed(()=>{
 	if (!props.items) return []
 	return props.items.map((item) => CalendarMath.normalizeItem(item, item.id === state.currentHoveredItemId))
 })
 
 // Period that today's date sits within
-const currentPeriodStart = computed((): Date => CalendarMath.beginningOfPeriod(CalendarMath.today(), props.displayPeriodUom, props.startingDayOfWeek))
-const currentPeriodEnd = computed(
-	(): Date => CalendarMath.addDays(CalendarMath.incrementPeriod(currentPeriodStart.value, props.displayPeriodUom, props.displayPeriodCount), -1)
-)
+const currentPeriodStart = computed(()=> CalendarMath.beginningOfPeriod(CalendarMath.today(), props.displayPeriodUom, props.startingDayOfWeek))
+const currentPeriodEnd = computed(()=> CalendarMath.addDays(CalendarMath.incrementPeriod(currentPeriodStart.value, props.displayPeriodUom, props.displayPeriodCount), -1))
 
 // Creates the HTML to render the date range for the calendar header.
-const periodLabel = computed((): string => CalendarMath.formattedPeriod(periodStart.value, periodEnd.value, props.displayPeriodUom, monthNames.value))
+const periodLabel = computed(()=> CalendarMath.formattedPeriod(periodStart.value, periodEnd.value, props.displayPeriodUom, monthNames.value))
 
-const currentPeriodLabelFinal = computed((): string => {
+const currentPeriodLabelFinal = computed(()=> {
 	const c = currentPeriodStart.value
 	const s = periodStart.value
 	if (!props.currentPeriodLabel) return CalendarMath.formattedPeriod(c, currentPeriodEnd.value, props.displayPeriodUom, monthNames.value)
@@ -269,8 +222,7 @@ const currentPeriodLabelFinal = computed((): string => {
 	return props.currentPeriodLabel
 })
 
-const headerProps = computed(
-	(): IHeaderProps => ({
+const headerProps = computed(()=>{ return {
 		// Dates for UI navigation
 		previousYear: getIncrementedPeriod(-12),
 		previousPeriod: getIncrementedPeriod(-1),
@@ -289,44 +241,41 @@ const headerProps = computed(
 		displayLastDate: displayLastDate.value,
 		monthNames: monthNames.value,
 		fixedItems: fixedItems.value,
-		periodLabel: periodLabel.value,
-	})
+		periodLabel: periodLabel.value
+	}}
 )
 
-const periodRange = computed(() => ({
+const periodRange = computed(()=>({
 	periodStart: periodStart,
 	periodEnd: periodEnd,
 	displayFirstDate: displayFirstDate,
-	displayLastDate: displayLastDate,
+	displayLastDate: displayLastDate
 }))
 
-watch(
-	() => periodRange,
-	(newVal) => {
+watch(periodRange,(newVal) => {
 		if (props.periodChangedCallback) {
 			emit("period-changed")
 			props.periodChangedCallback(newVal, "watch")
 		}
-	},
-	{ immediate: true, deep: true }
+	}
 )
 
 // ******************************
 // UI Events
 // ******************************
 
-const onClickDay = (day: Date, windowEvent: Event): void => {
+const onClickDay = (day, windowEvent)=> {
 	if (props.disablePast && CalendarMath.isInPast(day)) return
 	if (props.disableFuture && CalendarMath.isInFuture(day)) return
 	emit("click-date", day, findAndSortItemsInDateRange(day, day), windowEvent)
 }
 
-const onClickItem = (calendarItem: ICalendarItem, windowEvent: Event): void => emit("click-item", calendarItem, windowEvent)
+const onClickItem = (calendarItem, windowEvent)=> emit("click-item", calendarItem, windowEvent)
 
 // The day name header needs to know the dow for class assignment, and this value should
 // not change based on startingDayOfWeek (i.e., Sunday is always 0). This function
 // computes the dow for a given day index.
-const getColumnDOWClass = (dayIndex: number): string => "dow" + ((dayIndex + props.startingDayOfWeek) % 7)
+const getColumnDOWClass = (dayIndex)=> "dow" + ((dayIndex + props.startingDayOfWeek) % 7)
 
 // ******************************
 // Date Periods
@@ -335,7 +284,7 @@ const getColumnDOWClass = (dayIndex: number): string => "dow" + ((dayIndex + pro
 // Returns a date for the current display date moved forward or backward by a given
 // number of the current display units. Returns null if said move would result in a
 // disallowed display period.
-const getIncrementedPeriod = (count: number): Date | null => {
+const getIncrementedPeriod = (count)=>{
 	const newStartDate = CalendarMath.incrementPeriod(periodStart.value, props.displayPeriodUom, count)
 	const newEndDate = CalendarMath.incrementPeriod(newStartDate, props.displayPeriodUom, props.displayPeriodCount)
 	if (props.disablePast && newEndDate <= CalendarMath.today()) return null
@@ -347,14 +296,14 @@ const getIncrementedPeriod = (count: number): Date | null => {
 // Hover items (#95, #136)
 // ******************************
 
-const onMouseEnterItem = (calendarItem: ICalendarItem, windowEvent: Event): void => {
+const onMouseEnterItem = (calendarItem, windowEvent)=> {
 	state.currentHoveredItemId = calendarItem.id
 	if (props.doEmitItemMouseEvents) {
 		emit("item-mouseenter", calendarItem, windowEvent)
 	}
 }
 
-const onMouseLeaveItem = (calendarItem: ICalendarItem, windowEvent: Event): void => {
+const onMouseLeaveItem = (calendarItem, windowEvent)=> {
 	state.currentHoveredItemId = ""
 	if (props.doEmitItemMouseEvents) {
 		emit("item-mouseleave", calendarItem, windowEvent)
@@ -365,7 +314,7 @@ const onMouseLeaveItem = (calendarItem: ICalendarItem, windowEvent: Event): void
 // Dragging across days (selection)
 // ******************************
 
-const onDragDateStart = (day: Date, windowEvent: DragEvent): boolean => {
+const onDragDateStart = (day,windowEvent)=> {
 	if (!props.enableDateSelection) return false
 	// Push the date where the selection started into dataTransfer. This is not used by this component, but
 	// a value required in Firefox and possibly other browsers.
@@ -382,7 +331,7 @@ const onDragDateStart = (day: Date, windowEvent: DragEvent): boolean => {
 // Drag and drop items
 // ******************************
 
-const onDragItemStart = (calendarItem: INormalizedCalendarItem, windowEvent: DragEvent): boolean => {
+const onDragItemStart = (calendarItem, windowEvent)=> {
 	if (!props.enableDragDrop) return false
 	// Firefox and possibly other browsers require dataTransfer to be set, even if the value is not used. IE11
 	// requires that the first argument be exactly "text" (not "text/plain", etc.). The calendar item's ID is
@@ -405,42 +354,42 @@ const onDragItemStart = (calendarItem: INormalizedCalendarItem, windowEvent: Dra
 // also allows developers using scoped slots for items to handle the drag and drop themselves.
 
 // Non-null assertion used because the selection origin is pre-checked in all use cases
-const getSelectedDateRange = (d: Date): [Date, Date] => (d <= state.dateSelectionOrigin! ? [d, state.dateSelectionOrigin!] : [state.dateSelectionOrigin!, d])
+const getSelectedDateRange = (d)=>(d <= state.dateSelectionOrigin ? [d, state.dateSelectionOrigin] : [state.dateSelectionOrigin, d])
 
-const onDragOver = (day: Date, windowEvent: Event): void => {
+const onDragOver = (day, windowEvent)=>{
 	if (!props.enableDragDrop) return
-	emit("drag-over-date", state.currentDragItem!, day, windowEvent)
+	emit("drag-over-date", state.currentDragItem, day, windowEvent)
 }
 
-const onDragEnter = (day: Date, windowEvent: Event) => {
+const onDragEnter = (day, windowEvent) => {
 	if (props.enableDateSelection && state.dateSelectionOrigin) {
 		// User is selecting dates, not items.
 		emit("date-selection", getSelectedDateRange(day), windowEvent)
 	}
 	if (!props.enableDragDrop) return
-	emit("drag-enter-date", state.currentDragItem!, day, windowEvent)
-	const el = windowEvent.target as HTMLElement
+	emit("drag-enter-date", state.currentDragItem, day, windowEvent)
+	const el = windowEvent.target
 	el.classList.add("draghover")
 }
 
-const onDragLeave = (day: Date, windowEvent: Event): void => {
+const onDragLeave = (day, windowEvent)=> {
 	// User is selecting dates, not items. No emit.
 	if (props.enableDateSelection && props.selectionStart) return
 	if (!props.enableDragDrop) return
-	emit("drag-leave-date", state.currentDragItem!, day, windowEvent)
-	const el = windowEvent.target as HTMLElement
+	emit("drag-leave-date", state.currentDragItem, day, windowEvent)
+	const el = windowEvent.target
 	el.classList.remove("draghover")
 }
 
-const onDrop = (day: Date, windowEvent: Event): void => {
+const onDrop = (day, windowEvent)=> {
 	if (props.enableDateSelection && state.dateSelectionOrigin) {
 		// User is selecting dates, not items.
 		emit("date-selection-finish", getSelectedDateRange(day), windowEvent)
 		return
 	}
 	if (!props.enableDragDrop) return
-	emit("drop-on-date", state.currentDragItem!, day, windowEvent)
-	const el = windowEvent.target as HTMLElement
+	emit("drop-on-date", state.currentDragItem, day, windowEvent)
+	const el = windowEvent.target 
 	el.classList.remove("draghover")
 }
 
@@ -448,7 +397,7 @@ const onDrop = (day: Date, windowEvent: Event): void => {
 // Calendar Items
 // ******************************
 
-const itemComparer = (a: INormalizedCalendarItem, b: INormalizedCalendarItem) => {
+const itemComparer = (a, b) => {
 	if (a.startDate < b.startDate) return -1
 	if (b.startDate < a.startDate) return 1
 	if (a.endDate > b.endDate) return -1
@@ -457,16 +406,15 @@ const itemComparer = (a: INormalizedCalendarItem, b: INormalizedCalendarItem) =>
 }
 
 // Return a list of items that INCLUDE any portion of a given week.
-const findAndSortItemsInWeek = (weekStart: Date): INormalizedCalendarItem[] => findAndSortItemsInDateRange(weekStart, CalendarMath.addDays(weekStart, 6))
+const findAndSortItemsInWeek = (weekStart)=> findAndSortItemsInDateRange(weekStart, CalendarMath.addDays(weekStart, 6))
 
 // Return a list of items that INCLUDE any day within the date range,
 // inclusive, sorted so items that start earlier are returned first.
-const findAndSortItemsInDateRange = (startDate: Date, endDate: Date): INormalizedCalendarItem[] =>
-	fixedItems.value.filter((item) => item.endDate >= startDate && CalendarMath.dateOnly(item.startDate) <= endDate, this).sort(itemComparer)
+const findAndSortItemsInDateRange = (startDate, endDate)=>fixedItems.value.filter((item) => item.endDate >= startDate && CalendarMath.dateOnly(item.startDate) <= endDate, this).sort(itemComparer)
 
-const dayHasItems = (day: Date): boolean => !!fixedItems.value.find((d) => d.endDate >= day && CalendarMath.dateOnly(d.startDate) <= day)
+const dayHasItems = (day)=> !!fixedItems.value.find((d) => d.endDate >= day && CalendarMath.dateOnly(d.startDate) <= day)
 
-const dayIsSelected = (day: Date): boolean => {
+const dayIsSelected = (day)=> {
 	if (!props.selectionStart || !props.selectionEnd) return false
 	if (day < CalendarMath.dateOnly(props.selectionStart)) return false
 	if (day > CalendarMath.dateOnly(props.selectionEnd)) return false
@@ -475,10 +423,10 @@ const dayIsSelected = (day: Date): boolean => {
 
 // Return a list of items that CONTAIN the week starting on a day.
 // Sorted so the items that start earlier are always shown first.
-const getWeekItems = (weekStart: Date): INormalizedCalendarItem[] => {
+const getWeekItems = (weekStart)=> {
 	const items = findAndSortItemsInWeek(weekStart)
-	const results = [] as INormalizedCalendarItem[]
-	const itemRows: boolean[][] = [[], [], [], [], [], [], []]
+	const results = []
+	const itemRows = [[], [], [], [], [], [], []]
 	if (!items) return results
 	for (let i = 0; i < items.length; i++) {
 		const ep = Object.assign({}, items[i], {
@@ -511,7 +459,7 @@ const getWeekItems = (weekStart: Date): INormalizedCalendarItem[] => {
 
 // Creates the HTML to prefix the item title showing the items start and/or end time.
 // Midnight is not displayed.
-const getFormattedTimeRange = (item: INormalizedCalendarItem): string => {
+const getFormattedTimeRange = (item)=> {
 	const startTime = '<span class="startTime">' + CalendarMath.formattedTime(item.startDate, displayLocale.value, props.timeFormatOptions) + "</span>"
 	let endTime = ""
 	if (!CalendarMath.isSameDateTime(item.startDate, item.endDate)) {
@@ -520,13 +468,13 @@ const getFormattedTimeRange = (item: INormalizedCalendarItem): string => {
 	return startTime + endTime
 }
 
-const getItemTitle = (item: INormalizedCalendarItem): string => {
+const getItemTitle = (item)=>{
 	if (!props.showTimes) return item.title
 	return getFormattedTimeRange(item) + " " + item.title
 }
 
 // Compute the top position of the item based on its assigned row within the given week.
-const getItemTop = (item: INormalizedCalendarItem): string => {
+const getItemTop = (item)=> {
 	const r = item.itemRow
 	const h = props.itemContentHeight
 	const b = props.itemBorderHeight

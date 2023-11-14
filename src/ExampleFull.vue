@@ -141,40 +141,20 @@
 		</div>
 	</div>
 </template>
-<script setup lang="ts">
+
+<script setup>
+
+import { onMounted, reactive, computed } from "vue"
 // Using the publish version, you would do this instead:
 // import { CalendarView, CalendarViewHeader, CalendarMath } from "vue-simple-calendar"
 import CalendarView from "../../vue-simple-calendar/src/CalendarView.vue"
 import CalendarViewHeader from "../../vue-simple-calendar/src/CalendarViewHeader.vue"
 import CalendarMath from "../../vue-simple-calendar/src/CalendarMath"
-import { ICalendarItem, INormalizedCalendarItem } from "./ICalendarItem"
 
-import { onMounted, reactive, computed } from "vue"
 
-const thisMonth = (d: number, h?: number, m?: number): Date => {
+const thisMonth = (d,h,m)=>{
 	const t = new Date()
 	return new Date(t.getFullYear(), t.getMonth(), d, h || 0, m || 0)
-}
-
-interface IExampleState {
-	showDate: Date
-	message: string
-	startingDayOfWeek: number
-	disablePast: boolean
-	disableFuture: boolean
-	displayPeriodUom: string
-	displayPeriodCount: number
-	displayWeekNumbers: boolean
-	showTimes: boolean
-	selectionStart?: Date
-	selectionEnd?: Date
-	newItemTitle: string
-	newItemStartDate: string
-	newItemEndDate: string
-	useDefaultTheme: boolean
-	useHolidayTheme: boolean
-	useTodayIcons: boolean
-	items: ICalendarItem[]
 }
 
 const state = reactive({
@@ -274,11 +254,11 @@ const state = reactive({
 			title: "Same day 7",
 		},
 	],
-} as IExampleState)
+})
 
-const userLocale = computed((): string => CalendarMath.getDefaultBrowserLocale())
+const userLocale = computed(()=> CalendarMath.getDefaultBrowserLocale())
 
-const dayNames = computed((): string[] => CalendarMath.getFormattedWeekdayNames(userLocale.value, "long", 0))
+const dayNames = computed(()=> CalendarMath.getFormattedWeekdayNames(userLocale.value, "long", 0))
 
 const themeClasses = computed(() => ({
 	"theme-default": state.useDefaultTheme,
@@ -286,13 +266,13 @@ const themeClasses = computed(() => ({
 	"holiday-us-official": state.useHolidayTheme,
 }))
 
-const myDateClasses = (): Record<string, string[]> => {
+const myDateClasses = ()=>{
 	// This was added to demonstrate the dateClasses prop. Note in particular that the
 	// keys of the object are `yyyy-mm-dd` ISO date strings (not dates), and the values
 	// for those keys are strings or string arrays. Keep in mind that your CSS to style these
 	// may need to be fairly specific to make it override your theme's styles. See the
 	// CSS at the bottom of this component to see how these are styled.
-	const o = {} as Record<string, string[]>
+	const o = {}
 	const theFirst = thisMonth(1)
 	const ides = [2, 4, 6, 9].includes(theFirst.getMonth()) ? 15 : 13
 	const idesDate = thisMonth(ides)
@@ -301,12 +281,12 @@ const myDateClasses = (): Record<string, string[]> => {
 	return o
 }
 
-onMounted((): void => {
+onMounted(()=>{
 	state.newItemStartDate = CalendarMath.isoYearMonthDay(CalendarMath.today())
 	state.newItemEndDate = CalendarMath.isoYearMonthDay(CalendarMath.today())
 })
 
-const periodChanged = (): void => {
+const periodChanged = ()=>{
 	// range, eventSource) {
 	// Demo does nothing with this information, just including the method to demonstrate how
 	// you can listen for changes to the displayed range and react to them (by loading items, etc.)
@@ -314,32 +294,32 @@ const periodChanged = (): void => {
 	//console.log(range)
 }
 
-const onClickDay = (d: Date): void => {
+const onClickDay = (d)=>{
 	state.selectionStart = undefined
 	state.selectionEnd = undefined
 	state.message = `You clicked: ${d.toLocaleDateString()}`
 }
 
-const onClickItem = (e: INormalizedCalendarItem): void => {
+const onClickItem = (e)=>{
 	state.message = `You clicked: ${e.title}`
 }
 
-const setShowDate = (d: Date): void => {
+const setShowDate = (d)=>{
 	state.message = `Changing calendar view to ${d.toLocaleDateString()}`
 	state.showDate = d
 }
 
-const setSelection = (dateRange: Date[]): void => {
+const setSelection = (dateRange)=>{
 	state.selectionEnd = dateRange[1]
 	state.selectionStart = dateRange[0]
 }
 
-const finishSelection = (dateRange: Date[]): void => {
+const finishSelection = (dateRange)=>{
 	setSelection(dateRange)
 	state.message = `You selected: ${state.selectionStart?.toLocaleDateString() ?? "n/a"} - ${state.selectionEnd?.toLocaleDateString() ?? "n/a"}`
 }
 
-const onDrop = (item: INormalizedCalendarItem, date: Date): void => {
+const onDrop = (item, date)=>{
 	state.message = `You dropped ${item.id} on ${date.toLocaleDateString()}`
 	// Determine the delta between the old start date and the date chosen,
 	// and apply that delta to both the start and end date to move the item.
@@ -348,7 +328,7 @@ const onDrop = (item: INormalizedCalendarItem, date: Date): void => {
 	item.originalItem.endDate = CalendarMath.addDays(item.endDate, eLength)
 }
 
-const clickTestAddItem = (): void => {
+const clickTestAddItem = ()=>{
 	state.items.push({
 		startDate: CalendarMath.fromIsoStringToLocalDate(state.newItemStartDate),
 		endDate: CalendarMath.fromIsoStringToLocalDate(state.newItemEndDate),
@@ -358,6 +338,7 @@ const clickTestAddItem = (): void => {
 	state.message = "You added a calendar item!"
 }
 </script>
+
 <style>
 @import "https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css";
 /* For apps using the npm package, the below URLs should reference /node_modules/vue-simple-calendar/dist/css/ instead */

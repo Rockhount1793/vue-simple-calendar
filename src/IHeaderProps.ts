@@ -1,4 +1,3 @@
-import { ICalendarItem } from "./ICalendarItem"
 
 interface IHeaderProps {
 	periodStart: Date
@@ -16,7 +15,7 @@ interface IHeaderProps {
 	displayFirstDate: Date
 	displayLastDate: Date
 	monthNames: string[]
-	fixedItems: ICalendarItem[]
+	fixedItems: []
 }
 
 export { IHeaderProps }

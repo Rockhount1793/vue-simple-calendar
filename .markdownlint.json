@@ -1,8 +1,0 @@
-{
-	"no-hard-tabs": {
-		"code_blocks": false
-	},
-	"line-length": false,
-	"no-bare-urls": false,
-	"emphasis-style": false
-}

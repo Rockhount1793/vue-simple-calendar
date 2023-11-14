@@ -6,15 +6,4 @@ const path = require("path")
 
 export default defineConfig({
 	plugins: [vue()],
-	base: "./",
-	build: {
-		sourcemap: false,
-		rollupOptions: {
-			output: {
-				globals: {
-					vue: "Vue",
-				},
-			},
-		},
-	},
 })
