@@ -154,6 +154,21 @@ const props = defineProps({
 		enableHtmlTitles: {default:true}
 	})
 
+	const emit = defineEmits([
+	"period-changed",
+	"click-date",
+	"click-item",
+	"item-mouseenter",
+	"item-mouseleave",
+	"drag-start",
+	"drag-over-date",
+	"drag-enter-date",
+	"drag-leave-date",
+	"drop-on-date",
+	"date-selection",
+	"date-selection-start",
+	"date-selection-finish"
+	])
 
 const state = reactive({
 	currentDragItem: undefined,
